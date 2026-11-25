@@ -8,11 +8,11 @@ per order, 16 orders per batch, no shorts, no leverage, 2-slot latency.
 ## Entry (momentum, small first, pyramid into strength)
 
 A curve becomes a candidate on its CreateEvent. It is bought when, over a
-40-slot window, it is at least 8 slots old, holds 0.3–60 SOL of real reserve,
-shows ≥ 0.4 SOL of net inflow from ≥ 3 buys by ≥ 3 distinct buyers with no
-single buyer over 60% of the buy flow, has risen 3–150% from the window start
+40-slot window, it is at least 600 slots old, holds 1–60 SOL of real reserve,
+shows ≥ 2 SOL of net inflow from ≥ 3 buys by ≥ 7 distinct buyers with no
+single buyer over 40% of the buy flow, has risen 10–150% from the window start
 with the newer half of the window flowing in at least as fast as the older
-half, and sits within 20% of its window high. First buy: 0.05 SOL (capped by
+half, and sits within 10% of its window high. First buy: 0.03 SOL (capped by
 the 1%-of-reserve rule). While the tape stays strong and the price stays ≥ 5%
 above the last buy, add 0.05 SOL at a time up to 0.25 SOL per position.
 At most 4 momentum positions at once, at most 3 SOL at cost in total.
@@ -22,7 +22,7 @@ At most 4 momentum positions at once, at most 3 SOL at cost in total.
 - Stop loss: value ≤ 80% of cost.
 - Trailing stop: once value ≥ 125% of cost, exit if value falls 12% from its best.
 - Time limit: 900 slots held, unless up ≥ 10%.
-- Fade: net SOL over 60 slots < −0.5 SOL.
+- Fade: net SOL over 60 slots < −0.3 SOL.
 - Whale sell: any single recorded sell ≥ 1.5 SOL.
 - The replay closes a position itself when its curve completes.
 

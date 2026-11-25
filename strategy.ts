@@ -91,18 +91,18 @@ export interface Params {
 
 export const DEFAULT_PARAMS: Params = {
   windowSlots: 40,
-  minAgeSlots: 8,
-  minNetSol: 0.4,
+  minAgeSlots: 600,
+  minNetSol: 2,
   minBuys: 3,
-  minBuyers: 3,
-  maxBuyerShare: 0.6,
-  minPriceUp: 0.03,
+  minBuyers: 7,
+  maxBuyerShare: 0.4,
+  minPriceUp: 0.1,
   maxPriceUp: 1.5,
   accel: 1.0,
-  nearHigh: 0.8,
-  minRqSol: 0.3,
+  nearHigh: 0.9,
+  minRqSol: 1,
   maxRqSol: 60,
-  initialSol: 0.05,
+  initialSol: 0.03,
   addSol: 0.05,
   stakeSol: 0.25,
   minBuySol: 0.012,
@@ -111,7 +111,7 @@ export const DEFAULT_PARAMS: Params = {
   trail: 0.12,
   trailArm: 0.25,
   fadeWindow: 60,
-  fadeNetSol: 0.5,
+  fadeNetSol: 0.3,
   bigSellSol: 1.5,
   maxHoldSlots: 900,
   holdIfUp: 0.1,
@@ -236,6 +236,14 @@ export class MomentumBot {
       this.meta.set(mint, m);
     }
     return m;
+  }
+
+  /** True when a sell for this mint is still in flight. */
+  private pendingSell(state: BotState, mint: Pubkey): boolean {
+    for (const po of state.pending.values()) {
+      if (po.order.side === 'sell' && po.order.mint === mint) return true;
+    }
+    return false;
   }
 
   /** True when a buy for this mint is still in flight. */
@@ -410,6 +418,7 @@ export class MomentumBot {
     for (const [mint, pos] of state.positions) {
       if (!canOrder()) break;
       if (this.meta.get(mint)?.probePending) continue;
+      if (this.pendingSell(state, mint)) continue;
       const curve = state.curves.get(mint);
       if (curve === undefined || curve.complete) continue;
       const m = this.metaOf(mint, batch.slot);
@@ -448,6 +457,7 @@ export class MomentumBot {
     for (const [mint, pos] of state.positions) {
       if (!canOrder()) break;
       if (this.meta.get(mint)?.probePending) continue;
+      if (this.pendingBuy(state, mint)) continue;
       const curve = state.curves.get(mint);
       if (curve === undefined || curve.complete) continue;
       const m = this.metaOf(mint, batch.slot);
@@ -531,7 +541,7 @@ export class MomentumBot {
       const fillsPace = p.targetFills * paceShare;
       const coinsBehind = this.roundTripped.size < coinsPace;
       const fillsBehind = this.fillsSeen < fillsPace;
-      const openCount = state.committedPositionCount();
+      const openCount = state.committedPositionCount() + momentumBuys;
       if ((coinsBehind || fillsBehind) && openCount < caps.max_open_positions && free > SOL(p.probeSol) + tx) {
         // Most liquid curve we hold nothing in and have not probed into lately.
         let bestMint: Pubkey | null = null;
